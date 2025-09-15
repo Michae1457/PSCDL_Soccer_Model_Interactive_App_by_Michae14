@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚽ Soccer Analytics Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .dashboard-header {
+            background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        .card-header {
+            background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 100%);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            font-weight: bold;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 0.5rem 1.5rem;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1e3d1a 0%, #3a6b47 100%);
+        }
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+        .player-selector {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        #topPerformersChart {
+            min-height: 400px;
+        }
+        .stat-card {
+            text-align: center;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2d5a27;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="dashboard-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1><i class="fas fa-futbol"></i> Soccer Analytics Dashboard</h1>
+                    <p class="mb-0">Designed by Michael Xu</p>
+                    <p class="mb-0">Interactive PSCDL Performance Analysis & Recruitment Insights</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div id="dataStatus" class="badge bg-light text-dark">
+                        <i class="fas fa-spinner fa-spin"></i> Loading...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <!-- Data Status Alert -->
+        <div id="dataAlert" style="display: none;"></div>
+
+        <!-- PSCDL Framework Introduction -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-info-circle"></i> PSCDL Scoring Framework</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-0">
+                            <span style="color: #070707; font-weight: bold;">PSCDL Scoring Score</span>
+                            is a 5-subscore performance framework that evaluates players across five critical dimensions: 
+                            <span style="color: #e11c0e; font-weight: bold;">Passing/Creation (P)</span>, 
+                            <span style="color: #e11c0e; font-weight: bold;">Finishing/Shot Value (S)</span>, 
+                            <span style="color: #e11c0e; font-weight: bold;">Carrying/1v1 (C)</span>, 
+                            <span style="color: #e11c0e; font-weight: bold;">Defending/Disruption (D)</span>, and 
+                            <span style="color: #e11c0e; font-weight: bold;">Discipline (L)</span>. 
+                            These metrics are highly relevant for scouting because they capture the essential skills needed in modern soccer. 
+                            The framework includes 40+ statistical measures such as pass accuracy, progressive passes, xG per shot, successful dribbles, tackle success rates, and interceptions per 90 minutes. 
+                            <span style="color: #248f44; font-weight: bold;">This standardized approach allows scouts to identify both specialists (elite performers in specific areas) and all-rounders (balanced across multiple facets), enabling targeted recruitment based on tactical needs.</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalPlayers">-</div>
+                    <div class="stat-label">Total Players</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-number" id="meanPerformance">-</div>
+                    <div class="stat-label">Mean PSCDL Performance Score</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-number" id="top10Threshold">-</div>
+                    <div class="stat-label">Top 10% Threshold</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-number" id="top10PercentPlayers">-</div>
+                    <div class="stat-label"># of Top 10% Players</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Descriptive Analysis Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card"></div>
+                <h3 class="mb-3"><i class="fas fa-chart-line"></i> Descriptive Analysis</h3>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <!-- Performance Distribution -->
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-bar"></i> Performance Score Distribution</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="performanceDistribution" class="loading">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row mb-4">
+            <!-- Basic Statistics -->
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-line"></i> Statistics Leaders</h5>
+                        <div class="btn-group mt-2" role="group">
+                            <button type="button" class="btn btn-sm btn-outline-light active" onclick="updateBasicStatsChart('goals', 10)">Goals</button>
+                            <button type="button" class="btn btn-sm btn-outline-light" onclick="updateBasicStatsChart('xg', 10)">Expected Goals</button>
+                            <button type="button" class="btn btn-sm btn-outline-light" onclick="updateBasicStatsChart('assists', 10)">Assists</button>
+                            <button type="button" class="btn btn-sm btn-outline-light" onclick="updateBasicStatsChart('interceptions', 10)">Interceptions</button>
+                            <button type="button" class="btn btn-sm btn-outline-light" onclick="updateBasicStatsChart('tackles', 10)">Tackles</button>
+                            <button type="button" class="btn btn-sm btn-outline-light" onclick="updateBasicStatsChart('fouls', 10)">Fouls</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="basicStatsChart" class="loading">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Performers and Specialists Combined Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h3 class="mb-3"><i class="fas fa-trophy"></i> Top Specialists</h3>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <!-- Top Performers & Specialists Combined -->
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-trophy"></i> Top Specialists by PSCDL Performance Score</h5>
+                        <div class="btn-group mt-2" role="group">
+                            <button type="button" class="btn btn-sm btn-outline-light active" onclick="updateTopPerformersChart('performance_score', 10)">PSCDL Performance Score</button>
+                            <button type="button" class="btn btn-sm btn-outline-light" onclick="updateTopPerformersChart('P_score', 10)">Passing/Creation</button>
+                            <button type="button" class="btn btn-sm btn-outline-light" onclick="updateTopPerformersChart('S_score', 10)">Finishing/Shot</button>
+                            <button type="button" class="btn btn-sm btn-outline-light" onclick="updateTopPerformersChart('C_score', 10)">Carrying/1v1</button>
+                            <button type="button" class="btn btn-sm btn-outline-light" onclick="updateTopPerformersChart('D_score', 10)">Defending/Disruption</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Chart Section -->
+                            <div class="col-lg-8">
+                                <div id="topPerformersChart" class="loading">
+                                </div>
+                            </div>
+                            <!-- Table Section -->
+                            <div class="col-lg-4">
+                                <div id="specialistsTable" class="loading">
+                                    <i class="fas fa-spinner fa-spin"></i> Loading specialists...
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <div class="alert alert-info">
+                                <h6><i class="fas fa-lightbulb"></i><strong> P.S: Only players with at least 5 games played are included.</strong></h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Player Comparison Dashboard -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h3 class="mb-3"><i class="fas fa-users"></i> Player Comparison Dashboard</h3>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <!-- Player Selection -->
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-users"></i> Select Players to Compare</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Search and choose up to 6 players:</label>
+                            <input type="text" class="form-control mb-2" id="playerSearch" placeholder="Search players..." onkeyup="filterPlayers()">
+                            <div class="player-selector">
+                                <div id="playerList" class="list-group">
+                                    <div class="loading">Loading players...</div>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary w-100" onclick="updateComparisonDashboard()">
+                            <i class="fas fa-chart-bar"></i> Generate Comparison
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comparison Charts -->
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-bar"></i> Player Comparison Analysis</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Bar Chart Comparison -->
+                        <div class="mb-4">
+                            <h6>Specialist Score Comparison</h6>
+                            <div id="comparisonBarChart" class="loading">
+                                <i class="fas fa-info-circle"></i> Select players to generate comparison chart
+                            </div>
+                        </div>
+                        
+                        <!-- Radar Chart Comparison -->
+                        <div>
+                            <h6>Performance Profile Comparison</h6>
+                            <div id="comparisonRadarChart" class="loading">
+                                <i class="fas fa-info-circle"></i> Select players to generate radar chart
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Scatter Plot Analysis -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h3 class="mb-3"><i class="fas fa-chart-scatter"></i> Custom Scatter Plot Analysis</h3>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-chart-scatter"></i> Interactive Scatter Plot</h5>
+                        <p class="mb-0 mt-2">Compare any two metrics to discover relationships and patterns in player performance</p>
+                    </div>
+                    <div class="card-body">
+                        <!-- Axis Selection Controls -->
+                        <div class="row mb-3">
+                            <div class="col-md-5">
+                                <label for="xAxisSelect" class="form-label">X-Axis (Horizontal):</label>
+                                <select class="form-select" id="xAxisSelect" onchange="updateScatterPlot()">
+                                    <option value="performance_score">PSCDL Performance Score</option>
+                                    <option value="P_score">Passing/Creation Score</option>
+                                    <option value="S_score">Finishing/Shot Value Score</option>
+                                    <option value="C_score">Carrying/1v1 Score</option>
+                                    <option value="D_score">Defending/Disruption Score</option>
+                                    <option value="L_score">Discipline Score</option>
+                                    <option value="radar_area_normalized">Ability Coverage (Radar Area)</option>
+                                    <option value="total_games">Total Games Played</option>
+                                    <option value="total_minutes_played">Total Minutes Played</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end justify-content-center">
+                                <div class="text-center">
+                                    <i class="fas fa-arrows-alt-h fa-2x text-muted"></i>
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <label for="yAxisSelect" class="form-label">Y-Axis (Vertical):</label>
+                                <select class="form-select" id="yAxisSelect" onchange="updateScatterPlot()">
+                                    <option value="radar_area_normalized">Ability Coverage (Radar Area)</option>
+                                    <option value="performance_score">PSCDL Performance Score</option>
+                                    <option value="P_score">Passing/Creation Score</option>
+                                    <option value="S_score">Finishing/Shot Value Score</option>
+                                    <option value="C_score">Carrying/1v1 Score</option>
+                                    <option value="D_score">Defending/Disruption Score</option>
+                                    <option value="L_score">Discipline Score</option>
+                                    <option value="total_games">Total Games Played</option>
+                                    <option value="total_minutes_played">Total Minutes Played</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Scatter Plot -->
+                        <div id="scatterPlot" class="loading">
+                        </div>
+                        
+                        <!-- Analysis Tips -->
+                        <div class="mt-3">
+                            <div class="alert alert-info">
+                                <h6><i class="fas fa-lightbulb"></i> Analysis Tips:</h6>
+                                <ul class="mb-0">
+                                    <li><strong>Positive Correlation:</strong> Points trending upward indicate players who excel in both metrics</li>
+                                    <li><strong>Negative Correlation:</strong> Points trending downward suggest trade-offs between skills</li>
+                                    <li><strong>Clusters:</strong> Groups of players with similar performance profiles</li>
+                                    <li><strong>Outliers:</strong> Players with unique skill combinations worth investigating</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let selectedPlayers = new Set();
+        let playersData = [];
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+        });
+
+        // Load data and initialize dashboard
+        async function loadData() {
+            try {
+                const response = await fetch('/api/load_data');
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('success', result.message);
+                    initializeDashboard();
+                } else {
+                    showAlert('error', result.message);
+                }
+            } catch (error) {
+                showAlert('error', 'Failed to load data: ' + error.message);
+            }
+        }
+
+        // Initialize dashboard components
+        async function initializeDashboard() {
+            // First update data status and KPIs
+            await updateDataStatus();
+            
+            // Then load all charts and data
+            await Promise.all([
+                loadPerformanceDistribution(),
+                loadTopPerformersChart(),
+                loadBasicStatsChart(),
+                loadScatterPlot(),
+                loadPlayersList(),
+                loadSpecialists()
+            ]);
+        }
+
+        // Show alert messages
+        function showAlert(type, message) {
+            const alertDiv = document.getElementById('dataAlert');
+            alertDiv.className = type === 'error' ? 'error-message' : 'success-message';
+            alertDiv.textContent = message;
+            alertDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                alertDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Update data status
+        async function updateDataStatus() {
+            try {
+                const response = await fetch('/api/data_status');
+                const data = await response.json();
+                
+                const statusElement = document.getElementById('dataStatus');
+                if (data.loaded) {
+                    statusElement.innerHTML = '<i class="fas fa-check-circle"></i> Data Loaded (' + data.player_count + ' players)';
+                    statusElement.className = 'badge bg-success';
+                    
+                    // Update KPI numbers
+                    updateKPIs(data.player_count);
+                } else {
+                    statusElement.innerHTML = '<i class="fas fa-exclamation-triangle"></i> No Data';
+                    statusElement.className = 'badge bg-warning';
+                }
+            } catch (error) {
+                console.error('Error updating data status:', error);
+            }
+        }
+
+        // Update KPI numbers
+        async function updateKPIs(playerCount) {
+            try {
+                // Get performance data for calculations
+                const response = await fetch('/api/players_list');
+                const players = await response.json();
+                
+                if (players.length > 0) {
+                    const performanceScores = players.map(p => p.performance_score);
+                    const meanPerformance = performanceScores.reduce((a, b) => a + b, 0) / performanceScores.length;
+                    const top10Threshold = performanceScores.sort((a, b) => b - a)[Math.floor(performanceScores.length * 0.1)];
+                    const Top10PercentPlayers = performanceScores.filter(score => score >= top10Threshold).length;
+                    
+                    document.getElementById('totalPlayers').textContent = playerCount;
+                    document.getElementById('meanPerformance').textContent = meanPerformance.toFixed(1);
+                    document.getElementById('top10Threshold').textContent = top10Threshold.toFixed(1);
+                    document.getElementById('top10PercentPlayers').textContent = Top10PercentPlayers;
+                }
+            } catch (error) {
+                console.error('Error updating KPIs:', error);
+            }
+        }
+
+        // Load performance distribution chart
+        async function loadPerformanceDistribution() {
+            try {
+                const response = await fetch('/api/performance_distribution');
+                const chartData = await response.json();
+                
+                if (chartData && chartData.data && chartData.layout) {
+                    Plotly.newPlot('performanceDistribution', chartData.data, chartData.layout, {responsive: true});
+                } else {
+                    document.getElementById('performanceDistribution').innerHTML = 'No data available';
+                }
+            } catch (error) {
+                document.getElementById('performanceDistribution').innerHTML = 'Error loading chart';
+                console.error('Error loading performance distribution:', error);
+            }
+        }
+
+        // Load top performers chart
+        async function loadTopPerformersChart(category = 'performance_score', limit = 10) {
+            try {
+                const response = await fetch(`/api/top_performers?category=${category}&limit=${limit}`);
+                const chartData = await response.json();
+                
+                if (chartData && chartData.data && chartData.layout) {
+                    // Update layout to prevent text overlap
+                    chartData.layout.margin = {l: 200, r: 50, t: 50, b: 50};
+                    chartData.layout.height = 400;
+                    chartData.layout.yaxis = {
+                        ...chartData.layout.yaxis,
+                        automargin: true,
+                        title: {standoff: 20}
+                    };
+                    chartData.layout.xaxis = {
+                        ...chartData.layout.xaxis,
+                        automargin: true,
+                        title: {standoff: 20}
+                    };
+                    
+                    Plotly.newPlot('topPerformersChart', chartData.data, chartData.layout, {responsive: false});
+                } else {
+                    document.getElementById('topPerformersChart').innerHTML = 'No data available';
+                }
+            } catch (error) {
+                document.getElementById('topPerformersChart').innerHTML = 'Error loading chart';
+                console.error('Error loading top performers chart:', error);
+            }
+        }
+
+        // Update top performers chart (called by buttons)
+        function updateTopPerformersChart(category, limit) {
+            // Update button states
+            document.querySelectorAll('.btn-group .btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update both chart and specialists table to sync
+            loadTopPerformersChart(category, limit);
+            updateSpecialists(category, limit);
+        }
+
+        // Load scatter plot with custom axes
+        async function loadScatterPlot(xAxis = 'performance_score', yAxis = 'radar_area_normalized') {
+            try {
+                const response = await fetch(`/api/scatter_plot?x=${xAxis}&y=${yAxis}`);
+                const chartData = await response.json();
+                
+                if (chartData && chartData.data && chartData.layout) {
+                    Plotly.newPlot('scatterPlot', chartData.data, chartData.layout, {responsive: true});
+                } else {
+                    document.getElementById('scatterPlot').innerHTML = 'No data available';
+                }
+            } catch (error) {
+                document.getElementById('scatterPlot').innerHTML = 'Error loading chart';
+                console.error('Error loading scatter plot:', error);
+            }
+        }
+
+        // Update scatter plot when axes change
+        function updateScatterPlot() {
+            const xAxis = document.getElementById('xAxisSelect').value;
+            const yAxis = document.getElementById('yAxisSelect').value;
+            loadScatterPlot(xAxis, yAxis);
+        }
+
+        // Load players list
+        async function loadPlayersList() {
+            try {
+                const response = await fetch('/api/players_list');
+                const players = await response.json();
+                playersData = players;
+                
+                // Sort players by name
+                const sortedPlayers = players.sort((a, b) => a.player_name.localeCompare(b.player_name));
+                
+                const playerListDiv = document.getElementById('playerList');
+                playerListDiv.innerHTML = '';
+                
+                sortedPlayers.forEach(player => {
+                    const playerDiv = document.createElement('div');
+                    playerDiv.className = 'form-check';
+                    playerDiv.innerHTML = `
+                        <input class="form-check-input" type="checkbox" value="${player.player_name}" 
+                               id="player_${player.player_name.replace(/\s+/g, '_')}" 
+                               onchange="togglePlayer('${player.player_name}')">
+                        <label class="form-check-label" for="player_${player.player_name.replace(/\s+/g, '_')}">
+                            <strong>${player.player_name}</strong><br>
+                            <small class="text-muted">${player.team} - Score: ${player.performance_score.toFixed(1)}</small>
+                        </label>
+                    `;
+                    playerListDiv.appendChild(playerDiv);
+                });
+            } catch (error) {
+                document.getElementById('playerList').innerHTML = 'Error loading players';
+                console.error('Error loading players list:', error);
+            }
+        }
+
+        // Toggle player selection
+        function togglePlayer(playerName) {
+            if (selectedPlayers.has(playerName)) {
+                selectedPlayers.delete(playerName);
+            } else {
+                selectedPlayers.add(playerName);
+            }
+            
+            // Limit to 6 players for better visualization
+            if (selectedPlayers.size > 6) {
+                const firstPlayer = selectedPlayers.values().next().value;
+                selectedPlayers.delete(firstPlayer);
+                document.getElementById(`player_${firstPlayer.replace(/\s+/g, '_')}`).checked = false;
+            }
+        }
+
+        // Update comparison dashboard (both bar and radar charts)
+        async function updateComparisonDashboard() {
+            if (selectedPlayers.size === 0) {
+                alert('Please select at least one player to compare');
+                return;
+            }
+            
+            try {
+                const playerArray = Array.from(selectedPlayers);
+                
+                // Update radar chart
+                const radarUrl = `/api/pscdl_radar?${playerArray.map(p => `players=${encodeURIComponent(p)}`).join('&')}`;
+                const radarResponse = await fetch(radarUrl);
+                const radarData = await radarResponse.json();
+                
+                if (radarData && radarData.data && radarData.layout) {
+                    Plotly.newPlot('comparisonRadarChart', radarData.data, radarData.layout, {responsive: true});
+                } else {
+                    document.getElementById('comparisonRadarChart').innerHTML = 'No data available for selected players';
+                }
+                
+                // Update bar chart using backend API
+                const barUrl = `/api/pscdl_bar?${playerArray.map(p => `players=${encodeURIComponent(p)}`).join('&')}`;
+                const barResponse = await fetch(barUrl);
+                const barData = await barResponse.json();
+                
+                if (barData && barData.data && barData.layout) {
+                    Plotly.newPlot('comparisonBarChart', barData.data, barData.layout, {responsive: true});
+                } else {
+                    document.getElementById('comparisonBarChart').innerHTML = 'No data available for selected players';
+                }
+                
+            } catch (error) {
+                document.getElementById('comparisonRadarChart').innerHTML = 'Error loading radar chart';
+                document.getElementById('comparisonBarChart').innerHTML = 'Error loading bar chart';
+                console.error('Error loading comparison charts:', error);
+            }
+        }
+
+
+        // Update radar chart (legacy function for backward compatibility)
+        async function updateRadarChart() {
+            await updateComparisonDashboard();
+        }
+
+        // Load specialists table
+        async function loadSpecialists(area = 'performance_score', limit = 10) {
+            try {
+                const response = await fetch(`/api/specialists?area=${area}&limit=${limit}`);
+                const specialists = await response.json();
+                
+                const tableDiv = document.getElementById('specialistsTable');
+                if (specialists.length > 0) {
+                    let tableHTML = '<div class="table-responsive"><table class="table table-sm">';
+                    tableHTML += '<thead><tr><th>Player</th><th>Team</th><th>Score</th><th>Overall</th></tr></thead><tbody>';
+                    
+                    specialists.forEach(specialist => {
+                        tableHTML += `
+                            <tr>
+                                <td><strong>${specialist.player_name}</strong></td>
+                                <td>${specialist.team}</td>
+                                <td><span class="badge bg-primary">${specialist[area].toFixed(1)}</span></td>
+                                <td>${specialist.performance_score.toFixed(1)}</td>
+                            </tr>
+                        `;
+                    });
+                    
+                    tableHTML += '</tbody></table></div>';
+                    tableDiv.innerHTML = tableHTML;
+                } else {
+                    tableDiv.innerHTML = 'No specialists found';
+                }
+            } catch (error) {
+                document.getElementById('specialistsTable').innerHTML = 'Error loading specialists';
+                console.error('Error loading specialists:', error);
+            }
+        }
+
+        // Update specialists (called by dropdown or chart buttons)
+        function updateSpecialists(area = null, limit = 10) {
+            if (area === null) {
+                area = document.getElementById('specialistArea').value;
+            }
+            loadSpecialists(area, limit);
+        }
+
+        // Update specialists from dropdown (syncs with chart)
+        function updateSpecialistsFromDropdown() {
+            const area = document.getElementById('specialistArea').value;
+            // Update chart buttons to match dropdown selection
+            document.querySelectorAll('.btn-group .btn').forEach(btn => btn.classList.remove('active'));
+            
+            // Find and activate the corresponding button
+            const buttonMap = {
+                'P_score': 'Passing',
+                'S_score': 'Finishing', 
+                'C_score': 'Carrying',
+                'D_score': 'Defending',
+                'L_score': 'Discipline'
+            };
+            
+            const buttonText = buttonMap[area];
+            if (buttonText) {
+                const buttons = document.querySelectorAll('.btn-group .btn');
+                buttons.forEach(btn => {
+                    if (btn.textContent.trim() === buttonText) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
+            
+            // Update both chart and table
+            loadTopPerformersChart(area, 10);
+            loadSpecialists(area, 10);
+        }
+
+        // Load basic statistics chart
+        async function loadBasicStatsChart(statType = 'goals', limit = 10) {
+            try {
+                const response = await fetch(`/api/basic_stats_chart?stat_type=${statType}&limit=${limit}`);
+                const chartData = await response.json();
+                
+                if (chartData && chartData.data && chartData.layout) {
+                    Plotly.newPlot('basicStatsChart', chartData.data, chartData.layout, {responsive: true});
+                } else {
+                    document.getElementById('basicStatsChart').innerHTML = 'No data available';
+                }
+            } catch (error) {
+                document.getElementById('basicStatsChart').innerHTML = 'Error loading chart';
+                console.error('Error loading basic stats chart:', error);
+            }
+        }
+
+        // Update basic statistics chart (called by buttons)
+        function updateBasicStatsChart(statType, limit) {
+            // Update button states
+            document.querySelectorAll('.btn-group .btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            loadBasicStatsChart(statType, limit);
+        }
+
+
+        // Filter players based on search input
+        function filterPlayers() {
+            const searchTerm = document.getElementById('playerSearch').value.toLowerCase();
+            const playerItems = document.querySelectorAll('#playerList .form-check');
+            
+            playerItems.forEach(item => {
+                const playerName = item.querySelector('label').textContent.toLowerCase();
+                if (playerName.includes(searchTerm)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+
+
+
