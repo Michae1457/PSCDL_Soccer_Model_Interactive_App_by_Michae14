@@ -1160,7 +1160,7 @@ def show_dashboard_page():
     """, unsafe_allow_html=True)
     
     # Distribution Chart
-    st.plotly_chart(create_performance_distribution_chart(recruitment_df), width='stretch', key="distribution_chart")
+    st.plotly_chart(create_performance_distribution_chart(recruitment_df), config={"displayModeBar": True}, key="distribution_chart")
        
     # Basic Statistics Selector
     st.markdown("""
@@ -1183,7 +1183,7 @@ def show_dashboard_page():
         key="basic_stats_selector"
     )
     
-    st.plotly_chart(create_basic_stats_chart(totals_df, stat_type, 10), width='stretch', key=f"basic_stats_{stat_type}")
+    st.plotly_chart(create_basic_stats_chart(totals_df, stat_type, 10), config={"displayModeBar": True}, key=f"basic_stats_{stat_type}")
     
     # Top Performers & Specialists Section
     st.markdown("""
@@ -1209,7 +1209,7 @@ def show_dashboard_page():
             key="top_specialists_selector"
         )
         
-        st.plotly_chart(create_top_specialists_chart(recruitment_df, category, 10), width='stretch', key=f"top_specialists_{category}")
+        st.plotly_chart(create_top_specialists_chart(recruitment_df, category, 10), config={"displayModeBar": True}, key=f"top_specialists_{category}")
     
     with col2:
         # Top specialists table
@@ -1245,10 +1245,10 @@ def show_dashboard_page():
         col1, col2 = st.columns(2)
         
         with col1:
-            st.plotly_chart(create_pscdl_bar_chart(recruitment_df, selected_players), width='stretch', key="pscdl_bar_chart")
+            st.plotly_chart(create_pscdl_bar_chart(recruitment_df, selected_players), config={"displayModeBar": True}, key="pscdl_bar_chart")
         
         with col2:
-            st.plotly_chart(create_pscdl_radar_chart(recruitment_df, selected_players), width='stretch', key="pscdl_radar_chart")
+            st.plotly_chart(create_pscdl_radar_chart(recruitment_df, selected_players), config={"displayModeBar": True}, key="pscdl_radar_chart")
     
     # Custom Scatter Plot Analysis
     st.markdown("""
@@ -1295,7 +1295,7 @@ def show_dashboard_page():
             key="y_axis_selector"
         )
     
-    st.plotly_chart(create_scatter_plot(recruitment_df, x_axis, y_axis), width='stretch', key=f"scatter_plot_{x_axis}_{y_axis}")
+    st.plotly_chart(create_scatter_plot(recruitment_df, x_axis, y_axis), config={"displayModeBar": True}, key=f"scatter_plot_{x_axis}_{y_axis}")
     
     # Analysis Tips
     st.info("""
