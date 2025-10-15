@@ -95,3 +95,4 @@ insights = analyzer.get_recruitment_insights()
 *The numbered structure makes your soccer analytics pipeline easy to understand, maintain, and extend!* ⚽📊
 
 
+

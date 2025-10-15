@@ -1,0 +1,24 @@
+player_id,player_name,team,total_minutes_played,total_passes,total_completed_passes,total_progressive_passes,total_penalty_area_passes,total_long_passes,total_assists,total_key_passes,total_shots,total_shots_on_target,total_goals,total_xg,total_dribbles,total_successful_dribbles,total_duels,total_won_duels,total_tackles,total_successful_tackles,total_interceptions,total_ball_recoveries,total_clearances,total_blocks,total_fouls_committed,total_fouls_won,avg_pass_distance,avg_xg_per_shot,total_games
+38429.0,Luís Antônio Corrêa da Costa,Brazil,93,21,15,3,3,2,0,2,3,0,0,0.450948378,2,0,1,0,0,0,0,4,0,0,5,5,15.048794629585627,0.150316126,1
+38630.0,Carlos Caetano Bledorn Verri,Brazil,91,61,52,28,10,18,0,0,1,0,0,0.20846972,2,2,7,2,7,2,2,6,0,3,2,4,24.68465308754972,0.20846972,1
+38631.0,Claudio Andre Mergen Taffarel,Brazil,72,22,19,16,0,7,0,0,0,0,0,0.0,0,0,0,0,0,0,0,2,0,0,0,0,31.44821490270576,0.0,1
+38641.0,Diego Armando Maradona,Argentina,92,39,26,16,9,10,1,0,1,1,0,0.0717257,10,5,2,2,2,2,0,8,0,1,2,6,21.57314171117648,0.0717257,1
+38646.0,Jorge Luis Burruchaga,Argentina,88,36,25,13,1,4,0,0,1,1,0,0.02053686,2,2,2,0,0,0,0,10,1,0,1,1,15.75555046294014,0.02053686,1
+38654.0,Ricardo Omar Giusti,Argentina,87,29,23,9,1,3,0,1,0,0,0,0.0,1,1,8,1,6,1,1,3,2,3,4,1,16.931982692989845,0.0,1
+38657.0,Óscar Alfredo Ruggeri Zocola,Argentina,93,25,19,15,1,5,0,0,1,0,0,0.048671905,2,2,3,0,0,0,1,3,7,3,2,3,21.360003705421104,0.048671905,1
+38661.0,Julio Jorge Olarticoechea,Argentina,91,23,18,12,0,2,0,0,0,0,0,0.0,0,0,8,1,5,1,1,4,3,1,5,3,19.269856910704597,0.0,1
+39654.0,Jorge José de Amorim Campos,Brazil,93,54,38,13,7,4,0,0,1,0,0,0.16452737,3,0,6,0,5,0,0,6,1,0,3,5,18.572124432770504,0.16452737,1
+39656.0,Cláudio Ibrahim Vaz Leal,Brazil,92,57,44,20,11,13,0,2,2,0,0,0.0330430446,2,1,2,0,1,0,1,7,1,0,3,2,24.51857806410739,0.0165215223,1
+39826.0,Antônio de Oliveira Filho,Brazil,93,22,18,2,3,5,0,2,5,2,0,0.733156556,3,3,3,0,0,0,1,2,0,1,4,0,20.884880275111183,0.1466313112,1
+39829.0,Ricardo Rogério de Brito,Brazil,84,48,41,15,5,6,0,1,4,0,0,0.077365848,3,2,5,1,5,1,3,10,1,1,1,0,18.934194332285745,0.019341462,1
+42193.0,Ricardo Roberto Barreto da Rocha,Brazil,92,52,48,17,1,9,0,0,1,0,0,0.109386735,0,0,4,0,0,0,1,5,1,1,2,2,20.97217437905505,0.109386735,1
+397968.0,Juan Ernesto Simón,Argentina,90,21,18,12,2,3,0,0,0,0,0,0.0,1,1,3,0,1,0,0,5,9,5,2,1,21.1348461979385,0.0,1
+397969.0,Gabriel Humberto Calderón,Argentina,30,14,10,6,1,4,0,0,0,0,0,0.0,2,2,0,0,0,0,0,0,1,2,1,1,21.320012809766876,0.0,1
+398655.0,Claudio Paul Caniggia,Argentina,92,19,13,3,3,1,0,0,1,1,1,0.82277143,4,2,6,1,2,1,0,4,0,1,1,0,13.82156845305207,0.82277143,1
+398677.0,Mauro Geraldo Galvao,Brazil,84,55,53,26,1,13,0,0,0,0,0,0.0,1,1,3,0,2,0,0,5,3,0,1,0,22.91557571899397,0.0,1
+398678.0,Pedro Damián Monzón,Argentina,89,26,21,6,0,1,0,0,0,0,0,0.0,0,0,4,0,3,0,0,6,7,0,4,1,14.473147930650368,0.0,1
+398680.0,Valdo Cândido de Oliveira Filho,Brazil,92,56,41,13,12,13,0,3,0,0,0,0.0,8,7,4,1,3,1,0,4,0,0,0,5,19.86062180121539,0.0,1
+398681.0,José Horacio Basualdo,Argentina,86,23,16,8,2,2,0,0,0,0,0,0.0,5,4,3,0,2,0,1,5,5,1,0,2,16.351421274142822,0.0,1
+398682.0,Pedro Antonio Troglio,Argentina,62,32,25,13,3,5,0,1,2,1,0,0.059220484,0,0,2,0,1,0,1,7,1,1,3,5,18.5785994626575,0.029610242,1
+398683.0,Ricardo Gomes Raymundo,Brazil,82,39,34,15,2,5,0,0,0,0,0,0.0,1,1,2,0,0,0,3,5,1,0,3,1,20.4320521078087,0.0,1
+398687.0,Sergio Javier Goycochea,Argentina,89,32,23,24,0,22,0,0,0,0,0,0.0,0,0,0,0,0,0,0,2,0,0,0,0,42.21330835966914,0.0,1
